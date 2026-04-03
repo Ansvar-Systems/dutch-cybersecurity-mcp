@@ -1,33 +1,37 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "eu.ansvar/dutch-cybersecurity-mcp",
-  "description": "Query NCSC-NL (Nationaal Cyber Security Centrum) guidance including ICT-beveiligingsrichtlijnen, BIO, and security advisories",
+  "description": "NCSC-NL (Dutch National Cyber Security Centre) MCP server — guidance, advisories, and cybersecurity frameworks",
   "repository": {
     "url": "https://github.com/Ansvar-Systems/dutch-cybersecurity-mcp",
     "source": "github"
   },
   "homepage": "https://ansvar.eu",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "license": "Apache-2.0",
   "keywords": [
-    "ncsc-nl",
-    "dutch-cybersecurity",
-    "bio",
-    "ict-beveiligingsrichtlijnen",
     "cybersecurity",
     "netherlands",
-    "information-security",
+    "regulation",
     "compliance",
-    "mcp",
-    "ansvar"
+    "mcp"
   ],
   "packages": [
     {
       "registryType": "npm",
       "identifier": "@ansvar/dutch-cybersecurity-mcp",
-      "version": "0.1.0",
+      "version": "1.0.0",
       "transport": {
         "type": "stdio"
+      }
+    },
+    {
+      "registryType": "npm",
+      "identifier": "@ansvar/dutch-cybersecurity-mcp",
+      "version": "1.0.0",
+      "transport": {
+        "type": "streamable-http",
+        "url": "https://mcp.ansvar.eu/dutch-cybersecurity/mcp"
       }
     }
   ]
