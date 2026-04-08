@@ -1,0 +1,39 @@
+{
+  "schema_version": "1",
+  "mcp": "eu.ansvar/dutch-cybersecurity-mcp",
+  "jurisdiction": "NL",
+  "authority": "NCSC-NL (Nationaal Cyber Security Centrum)",
+  "authority_url": "https://www.ncsc.nl/",
+  "sources": [
+    {
+      "id": "ncsc-nl-guidance",
+      "name": "NCSC-NL Guidance Documents",
+      "url": "https://www.ncsc.nl/documenten",
+      "format": "HTML",
+      "series": [
+        "ICT-beveiligingsrichtlijnen",
+        "BIO",
+        "NIS2",
+        "NCSC-NL"
+      ]
+    },
+    {
+      "id": "ncsc-nl-advisories",
+      "name": "NCSC-NL Security Advisories",
+      "url": "https://advisories.ncsc.nl/csaf/v2/",
+      "format": "CSAF v2 JSON",
+      "series": ["advisory"]
+    }
+  ],
+  "tools": [
+    "nl_cyber_search_guidance",
+    "nl_cyber_get_guidance",
+    "nl_cyber_search_advisories",
+    "nl_cyber_get_advisory",
+    "nl_cyber_list_frameworks",
+    "nl_cyber_list_sources",
+    "nl_cyber_check_data_freshness",
+    "nl_cyber_about"
+  ],
+  "notes": "Covers publicly available NCSC-NL publications. Does not include classified or restricted content."
+}
