@@ -1,0 +1,59 @@
+name: Check Data Freshness
+
+on:
+  schedule:
+    # Run every Monday at 07:00 UTC
+    - cron: "0 7 * * 1"
+  workflow_dispatch:
+
+jobs:
+  check-freshness:
+    name: Check NCSC-NL Data Freshness
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Check advisory feed
+        id: advisory_check
+        run: |
+          HTTP_STATUS=$(curl -o /dev/null -s -w "%{http_code}" \
+            "https://advisories.ncsc.nl/advisories.json")
+          echo "status=$HTTP_STATUS" >> "$GITHUB_OUTPUT"
+          if [ "$HTTP_STATUS" != "200" ]; then
+            echo "::warning::Advisory feed returned HTTP $HTTP_STATUS"
+          else
+            echo "Advisory feed is reachable (HTTP 200)"
+          fi
+
+      - name: Check guidance source
+        run: |
+          HTTP_STATUS=$(curl -o /dev/null -s -w "%{http_code}" \
+            "https://www.ncsc.nl/documenten")
+          if [ "$HTTP_STATUS" != "200" ]; then
+            echo "::warning::Guidance source returned HTTP $HTTP_STATUS"
+          else
+            echo "Guidance source is reachable (HTTP 200)"
+          fi
+
+      - name: Summary
+        run: |
+          echo "## Data Freshness Check" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Source | Status |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|--------|--------|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| NCSC-NL Advisories feed | ${{ steps.advisory_check.outputs.status }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Run \`npm run ingest\` locally or trigger the ingest workflow to refresh data." >> "$GITHUB_STEP_SUMMARY"
