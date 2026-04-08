@@ -26,6 +26,7 @@ import {
   searchAdvisories,
   getAdvisory,
   listFrameworks,
+  getDataFreshness,
 } from "./db.js";
 import { buildCitation } from "./citation.js";
 
@@ -154,6 +155,26 @@ const TOOLS = [
       required: [],
     },
   },
+  {
+    name: "nl_cyber_list_sources",
+    description:
+      "List the data sources used by this MCP server, including URLs, data types, and update frequency.",
+    inputSchema: {
+      type: "object" as const,
+      properties: {},
+      required: [],
+    },
+  },
+  {
+    name: "nl_cyber_check_data_freshness",
+    description:
+      "Check when the data in this MCP was last updated. Returns the most recent dates for guidance documents and security advisories.",
+    inputSchema: {
+      type: "object" as const,
+      properties: {},
+      required: [],
+    },
+  },
 ];
 
 // --- Zod schemas for argument validation --------------------------------------
@@ -180,12 +201,23 @@ const GetAdvisoryArgs = z.object({
   reference: z.string().min(1),
 });
 
-// --- Helper ------------------------------------------------------------------
+// --- Helpers -----------------------------------------------------------------
+
+const META = {
+  disclaimer:
+    "Data sourced from NCSC-NL (Nationaal Cyber Security Centrum). Verify against official sources before acting on this information.",
+  copyright:
+    "© NCSC-NL. Content reproduced for informational purposes under NCSC-NL terms of use.",
+  source_url: "https://www.ncsc.nl/",
+};
 
 function textContent(data: unknown) {
+  const payload = typeof data === "object" && data !== null
+    ? { ...data as Record<string, unknown>, _meta: META }
+    : data;
   return {
     content: [
-      { type: "text" as const, text: JSON.stringify(data, null, 2) },
+      { type: "text" as const, text: JSON.stringify(payload, null, 2) },
     ],
   };
 }
@@ -231,15 +263,15 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         if (!doc) {
           return errorContent(`Guidance document not found: ${parsed.reference}`);
         }
-        const d = doc as Record<string, unknown>;
+        const d = doc as unknown as Record<string, unknown>;
         return textContent({
           ...d,
           _citation: buildCitation(
-            String(d.reference ?? parsed.reference),
-            String(d.title ?? d.reference ?? parsed.reference),
+            String(d["reference"] ?? parsed.reference),
+            String(d["title"] ?? d["reference"] ?? parsed.reference),
             "nl_cyber_get_guidance",
             { reference: parsed.reference },
-            d.url != null ? String(d.url) : undefined,
+            d["url"] != null ? String(d["url"]) : undefined,
           ),
         });
       }
@@ -260,15 +292,15 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         if (!advisory) {
           return errorContent(`Advisory not found: ${parsed.reference}`);
         }
-        const adv = advisory as Record<string, unknown>;
+        const adv = advisory as unknown as Record<string, unknown>;
         return textContent({
           ...adv,
           _citation: buildCitation(
-            String(adv.reference ?? parsed.reference),
-            String(adv.title ?? adv.reference ?? parsed.reference),
+            String(adv["reference"] ?? parsed.reference),
+            String(adv["title"] ?? adv["reference"] ?? parsed.reference),
             "nl_cyber_get_advisory",
             { reference: parsed.reference },
-            adv.url != null ? String(adv.url) : undefined,
+            adv["url"] != null ? String(adv["url"]) : undefined,
           ),
         });
       }
@@ -292,6 +324,33 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           },
           tools: TOOLS.map((t) => ({ name: t.name, description: t.description })),
         });
+      }
+
+      case "nl_cyber_list_sources": {
+        return textContent({
+          sources: [
+            {
+              id: "ncsc-nl-guidance",
+              name: "NCSC-NL Guidance Documents",
+              url: "https://www.ncsc.nl/documenten",
+              types: ["guidance", "framework", "technical", "board"],
+              update_frequency: "as published by NCSC-NL",
+            },
+            {
+              id: "ncsc-nl-advisories",
+              name: "NCSC-NL Security Advisories (CSAF v2)",
+              url: "https://advisories.ncsc.nl/csaf/v2/",
+              types: ["advisory"],
+              update_frequency: "as published by NCSC-NL",
+            },
+          ],
+          ingest_script: "scripts/ingest-ncsc-nl.ts",
+        });
+      }
+
+      case "nl_cyber_check_data_freshness": {
+        const freshness = getDataFreshness();
+        return textContent(freshness);
       }
 
       default:
