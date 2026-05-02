@@ -2,7 +2,7 @@
   "name": "@ansvar/dutch-cybersecurity-mcp",
   "version": "0.1.0",
   "mcpName": "eu.ansvar/dutch-cybersecurity-mcp",
-  "description": "NCSC-NL (Dutch National Cyber Security Centre) MCP server — guidance, advisories, and cybersecurity frameworks",
+  "description": "NCSC-NL (Dutch National Cyber Security Centre) MCP server \u2014 guidance, advisories, and cybersecurity frameworks",
   "type": "module",
   "main": "dist/src/index.js",
   "bin": {
