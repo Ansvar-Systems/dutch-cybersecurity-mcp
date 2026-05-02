@@ -61,8 +61,8 @@ Ingestion fetches from the upstream source(s) listed under **Sources** below and
 
 | Source | Source URL | Terms / license URL | License basis | Attribution required | Commercial use | Redistribution / caching | Notes |
 |---|---|---|---|---|---|---|---|
-| _Source not yet recorded_ | _N/A_ | _N/A_ | Unverified — confirm with the upstream provider before reuse | Unverified | Unverified | Unverified | This MCP's ingestion script downloads from one or more upstream sources whose terms have not been recorded here. Self-hosters must inspect the ingestion script and confirm the rights basis for each source before commercial use. |
-
+| [NCSC-NL](https://advisories.ncsc.nl/) | https://advisories.ncsc.nl/ | [Terms](https://www.ncsc.nl/copyright) | CC0 1.0 (public domain dedication) | No | Yes | Yes | Scrapes N |
+| [www.ncsc.nl](https://www.ncsc.nl/) | https://www.ncsc.nl/ | [Terms](https://www.ncsc.nl/copyright) | CC0 1.0 (public domain dedication) | No | Yes | Yes | Dutch NCSC (Nationaal Cyber Security Centrum) advisories and guidance are released under CC0 — the copyright page expressly states 'Hergebruik van de inhoud van deze site is toegestaan' (reuse permitted) and 'Bij hergebruik van de inhoud van deze website is naamsvermelding niet verplicht' (attribution not required when reusing content). Photos and logos are excluded; portrait, privacy, patent, and trademark rights are unchanged. Citations must not imply Dutch government endorsement. |
 
 ## What this repository does not provide
 
