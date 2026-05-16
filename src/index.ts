@@ -27,7 +27,7 @@ import {
   getAdvisory,
   listFrameworks,
 } from "./db.js";
-import { buildCitation } from "./citation.js";
+import { buildCitation, buildItemAttribution } from "./citation.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -222,7 +222,17 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           status: parsed.status,
           limit: parsed.limit,
         });
-        return textContent({ results, count: results.length });
+        // Source Attribution Standard: per-item _citation on every served item.
+        const resultsWithCitation = results.map((r) => {
+          const row = r as unknown as Record<string, unknown>;
+          return {
+            ...row,
+            _citation: buildItemAttribution(
+              row["url"] != null ? String(row["url"]) : undefined,
+            ),
+          };
+        });
+        return textContent({ results: resultsWithCitation, count: resultsWithCitation.length });
       }
 
       case "nl_cyber_get_guidance": {
@@ -251,7 +261,17 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           severity: parsed.severity,
           limit: parsed.limit,
         });
-        return textContent({ results, count: results.length });
+        // Source Attribution Standard: per-item _citation on every served item.
+        const resultsWithCitation = results.map((r) => {
+          const row = r as unknown as Record<string, unknown>;
+          return {
+            ...row,
+            _citation: buildItemAttribution(
+              row["url"] != null ? String(row["url"]) : undefined,
+            ),
+          };
+        });
+        return textContent({ results: resultsWithCitation, count: resultsWithCitation.length });
       }
 
       case "nl_cyber_get_advisory": {
@@ -275,7 +295,17 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
       case "nl_cyber_list_frameworks": {
         const frameworks = listFrameworks();
-        return textContent({ frameworks, count: frameworks.length });
+        // Source Attribution Standard: per-item _citation on every served item.
+        const frameworksWithCitation = frameworks.map((f) => {
+          const row = f as unknown as Record<string, unknown>;
+          return {
+            ...row,
+            _citation: buildItemAttribution(
+              row["url"] != null ? String(row["url"]) : undefined,
+            ),
+          };
+        });
+        return textContent({ frameworks: frameworksWithCitation, count: frameworksWithCitation.length });
       }
 
       case "nl_cyber_about": {

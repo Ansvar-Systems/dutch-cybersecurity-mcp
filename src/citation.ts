@@ -21,6 +21,57 @@ export interface CitationMetadata {
     tool: string;
     args: Record<string, string>;
   };
+  // Source-attribution contract per the Source Attribution Standard.
+  // Declared upstream in sources.yml and in the fleet manifest's attribution block.
+  // Every served item MUST carry these fields so the gateway can verify upstream
+  // source rights at fan-out time (see scripts/audit-source-legitimacy.py).
+  publisher?: string;
+  license?: string;
+  retrieved_at?: string;
+}
+
+/**
+ * Source attribution constant for this MCP. Mirrors sources.yml and the fleet
+ * manifest's attribution block. Hardcoded here because dutch-cybersecurity-mcp
+ * has exactly one upstream publisher; adding a second source requires extending
+ * to a per-item lookup.
+ *
+ * publisher: bare hostname matching infrastructure/policy/source-authority-registry.yml
+ * license:   SPDX code from infrastructure/attribution-licenses.json (CC0-1.0 entry
+ *            confirms commercial_allowed=true, safe_for_public_ghcr=true)
+ */
+export const SOURCE_ATTRIBUTION = {
+  publisher: "ncsc.nl",
+  license: "CC0-1.0",
+  base_url: "https://www.ncsc.nl/",
+} as const;
+
+/**
+ * Build a minimal source-attribution stub for items in a search result list.
+ * Returns the publisher / license / source_url / retrieved_at subset.
+ *
+ * Used for search_* tool responses where building the full entity-linker
+ * citation (canonical_ref / display_text / aliases / lookup) per item would
+ * be expensive. The gateway's source-rights verification only requires the
+ * three attribution fields; the entity-linker citation is built lazily on
+ * follow-up get_* calls.
+ *
+ * @param sourceUrl  Optional item-level URL. If absent, falls back to the
+ *                   publisher base URL (per the 2026-05-16 known-gap noted in
+ *                   sources.yml; closes once the DB schema captures per-item URLs).
+ */
+export function buildItemAttribution(sourceUrl?: string | null): {
+  publisher: string;
+  license: string;
+  source_url: string;
+  retrieved_at: string;
+} {
+  return {
+    publisher: SOURCE_ATTRIBUTION.publisher,
+    license: SOURCE_ATTRIBUTION.license,
+    source_url: sourceUrl || SOURCE_ATTRIBUTION.base_url,
+    retrieved_at: new Date().toISOString(),
+  };
 }
 
 /**
@@ -43,15 +94,21 @@ export function buildCitation(
   sourceUrl?: string | null,
   aliases?: string[],
 ): CitationMetadata {
+  // Source-attribution fields are always populated from SOURCE_ATTRIBUTION; the
+  // Source Attribution Standard requires every served item to carry them. The
+  // source_url falls back to publisher base URL when item-level URL is absent.
   return {
     canonical_ref: canonicalRef,
     display_text: displayText,
     ...(aliases && aliases.length > 0 && { aliases }),
-    ...(sourceUrl && { source_url: sourceUrl }),
+    source_url: sourceUrl || SOURCE_ATTRIBUTION.base_url,
     lookup: {
       tool: toolName,
       args: toolArgs,
     },
+    publisher: SOURCE_ATTRIBUTION.publisher,
+    license: SOURCE_ATTRIBUTION.license,
+    retrieved_at: new Date().toISOString(),
   };
 }
 
