@@ -1,0 +1,87 @@
+# sources.yml — data provenance contract for dutch-cybersecurity-mcp.
+#
+# This file documents the upstream sources this MCP ingests and the legal basis
+# for serving them through the gateway. Field set matches the fleet-wide pattern
+# (other-MCP sources.yml in ~/Projects/<repo>-mcp/sources.yml).
+#
+# Companion contracts:
+#   - Fleet manifest attribution block: backstage/catalog/fleet-manifests/dutch-cybersecurity.json
+#   - Source-authority registry whitelist: infrastructure/policy/source-authority-registry.yml (host: ncsc.nl)
+#   - License catalog: infrastructure/attribution-licenses.json (CC0-1.0 entry)
+#   - Audit doc: docs/audits/2026-05-16-ap-tdm-signal-check.md (TDM-signal verification methodology applied to ncsc.nl)
+
+schema_version: "1.0"
+mcp_name: "Dutch Cybersecurity MCP"
+category: "regulation"
+jurisdiction: "Netherlands"
+
+sources:
+  - name: "NCSC-NL"
+    authority: "Nationaal Cyber Security Centrum (Ministerie van Justitie en Veiligheid)"
+    official_url: "https://www.ncsc.nl"
+    retrieval_method: "AUTOMATED"
+    retrieval_script: "scripts/ingest-ncsc-nl.ts"
+    format:
+      - "HTML"     # guidance pages under /documenten/
+      - "JSON"     # advisories index at https://advisories.ncsc.nl/advisories.json
+      - "CSAF-v2"  # individual advisory bundles under https://advisories.ncsc.nl/csaf/v2/
+    authentication: "none"
+    update_frequency: "weekly"
+    license:
+      spdx: "CC0-1.0"
+      type: "Creative Commons Zero v1.0 Universal"
+      url: "https://www.ncsc.nl/copyright"
+      summary: >-
+        NCSC-NL copyright page declares CC0-1.0 by default for all site content
+        ("Tenzij anders vermeld is op de inhoud van deze website de Creative
+        Commons zero-verklaring (CC0) van toepassing"). Photos and logos
+        explicitly excluded and MUST NOT be ingested. Individual advisories may
+        carry an "anders vermeld" notice; ingestion code performs a per-advisory
+        spot-check to skip any with explicit non-CC0 declarations.
+    legal_basis:
+      - "Wet hergebruik overheidsinformatie (Who) — NCSC-NL is a Rijksoverheid body bound by public-task reuse default"
+      - "Art. 15b Auteurswet — government publications uncopyrighted unless explicitly reserved (NCSC-NL has NOT reserved)"
+    verification:
+      registry_status: "whitelisted"
+      registry_entry: "infrastructure/policy/source-authority-registry.yml (host: ncsc.nl)"
+      last_verified_at: "2026-05-16"
+      verified_by: "claude-dutch-licensing-audit-2026-05-16"
+    coverage:
+      scope: >-
+        ICT-beveiligingsrichtlijnen, Baseline Informatiebeveiliging Overheid (BIO references),
+        NIS2 guidance, 10 Steps to Cyber Security, Cyber Assessment Framework (CAF),
+        Cyber Essentials, and NCSC-NL security advisories (CSAF v2).
+      item_count_guidance: 13       # as of last ingest run 2026-03-23
+      item_count_advisories: 50     # as of last ingest run 2026-03-23
+      item_count_frameworks: 4
+    languages:
+      - "nl"
+      - "en"     # title_en is captured where bilingual versions exist
+    carve_outs:
+      - "Photos and visuals on ncsc.nl are excluded from ingestion per CC0 photo carve-out"
+      - "NCSC-NL logo and visual identity are trademarked; not ingested"
+
+# Source-attribution contract enforced at response time:
+#   Every search/get tool response item carries _citation.{publisher, license, source_url}
+#   matching the values declared above. See src/citation.ts for the implementation.
+#
+# Per-item source_url accuracy is a known gap as of 2026-05-16: the current DB schema
+# does not capture per-item URLs during ingestion (only the reference ID). Responses
+# fall back to the publisher base URL https://www.ncsc.nl/ for source_url. Closing this
+# gap requires: (a) adding a `url` column to guidance/advisories tables in src/db.ts,
+# (b) updating scripts/ingest-ncsc-nl.ts to capture the URL during fetch, (c) re-running
+# ingestion. Tracked as a follow-up.
+
+# Future-expansion sources (not currently ingested — listed for transparency and as a
+# roadmap reference). Adding any of these requires a new entry in source-authority-registry.yml
+# AND verification per docs/runbooks/source-licensing-audit-methodology.md:
+expansion_candidates:
+  - host: "nctv.nl"
+    authority: "Nationaal Coördinator Terrorismebestrijding en Veiligheid"
+    relevance: "Cyber threat directives, dreigingsbeeld assessments"
+  - host: "rdi.nl"
+    authority: "Rijksinspectie Digitale Infrastructuur (NIS2 competent authority for digital infrastructure sector)"
+    relevance: "NIS2 enforcement decisions, sector-specific guidance"
+  - host: "overheid.nl"
+    authority: "BIO baseline (Baseline Informatiebeveiliging Overheid)"
+    relevance: "Government-wide infosec baseline; currently referenced but not ingested as a separate corpus"
