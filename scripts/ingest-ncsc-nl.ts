@@ -469,9 +469,9 @@ async function ingestAdvisories(
 
   const insertAdvisory = db.prepare(`
     INSERT OR REPLACE INTO advisories
-      (reference, title, date, severity, affected_products, summary, full_text, cve_references)
+      (reference, title, date, severity, affected_products, summary, full_text, cve_references, source_url)
     VALUES
-      (?, ?, ?, ?, ?, ?, ?, ?)
+      (?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
   let ingested = 0;
@@ -515,6 +515,7 @@ async function ingestAdvisories(
           summary,
           fullText,
           cves.length > 0 ? JSON.stringify(cves) : null,
+          url, // source_url — the CSAF document this advisory was fetched from
         );
         state.advisoriesCompleted.push(advisoryId);
       }
@@ -791,9 +792,9 @@ async function ingestGuidance(
 
   const insertGuidance = db.prepare(`
     INSERT OR REPLACE INTO guidance
-      (reference, title, title_en, date, type, series, summary, full_text, topics, status)
+      (reference, title, title_en, date, type, series, summary, full_text, topics, status, source_url)
     VALUES
-      (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
   let ingested = 0;
@@ -807,6 +808,10 @@ async function ingestGuidance(
         state.guidanceCompleted.push(urlPath);
         continue;
       }
+
+      // source_url — the canonical NCSC-NL page this guidance was scraped from
+      // (same normalisation scrapeGuidancePage applies to urlPath internally).
+      const sourceUrl = urlPath.startsWith("http") ? urlPath : `${NCSC_BASE}${urlPath}`;
 
       if (dryRun) {
         log(`[DRY-RUN] Would insert guidance ${doc.reference}: ${doc.title} (${doc.type})`);
@@ -822,6 +827,7 @@ async function ingestGuidance(
           doc.full_text,
           doc.topics,
           doc.status,
+          sourceUrl,
         );
         state.guidanceCompleted.push(urlPath);
       }

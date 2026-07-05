@@ -65,12 +65,12 @@ sources:
 #   Every search/get tool response item carries _citation.{publisher, license, source_url}
 #   matching the values declared above. See src/citation.ts for the implementation.
 #
-# Per-item source_url accuracy is a known gap as of 2026-05-16: the current DB schema
-# does not capture per-item URLs during ingestion (only the reference ID). Responses
-# fall back to the publisher base URL https://www.ncsc.nl/ for source_url. Closing this
-# gap requires: (a) adding a `url` column to guidance/advisories tables in src/db.ts,
-# (b) updating scripts/ingest-ncsc-nl.ts to capture the URL during fetch, (c) re-running
-# ingestion. Tracked as a follow-up.
+# Per-item source_url (fleet#473): FIXED at ingest as of 2026-07-05. src/db.ts now has a
+# `source_url` column on guidance + advisories, and scripts/ingest-ncsc-nl.ts persists the
+# honest per-item fetch URL (advisories: the CSAF document URL `${CSAF_BASE}/${csafPath}`;
+# guidance: the canonical NCSC-NL page URL). No fabrication — an item with no honest
+# per-item URL keeps source_url NULL. REMAINING: re-run ingestion + re-consolidate into
+# eu-cybersecurity so served rows carry the URL (the DB predates the column).
 
 # Future-expansion sources (not currently ingested — listed for transparency and as a
 # roadmap reference). Adding any of these requires a new entry in source-authority-registry.yml
