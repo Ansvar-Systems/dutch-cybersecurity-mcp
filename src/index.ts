@@ -228,7 +228,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           return {
             ...row,
             _citation: buildItemAttribution(
-              row["url"] != null ? String(row["url"]) : undefined,
+              row["source_url"] != null ? String(row["source_url"]) : undefined,
             ),
           };
         });
@@ -249,7 +249,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             String(d.title ?? d.reference ?? parsed.reference),
             "nl_cyber_get_guidance",
             { reference: parsed.reference },
-            d.url != null ? String(d.url) : undefined,
+            d.source_url != null ? String(d.source_url) : undefined,
           ),
         });
       }
@@ -267,7 +267,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           return {
             ...row,
             _citation: buildItemAttribution(
-              row["url"] != null ? String(row["url"]) : undefined,
+              row["source_url"] != null ? String(row["source_url"]) : undefined,
             ),
           };
         });
@@ -288,7 +288,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             String(adv.title ?? adv.reference ?? parsed.reference),
             "nl_cyber_get_advisory",
             { reference: parsed.reference },
-            adv.url != null ? String(adv.url) : undefined,
+            adv.source_url != null ? String(adv.source_url) : undefined,
           ),
         });
       }
@@ -301,7 +301,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           return {
             ...row,
             _citation: buildItemAttribution(
-              row["url"] != null ? String(row["url"]) : undefined,
+              row["source_url"] != null ? String(row["source_url"]) : undefined,
             ),
           };
         });

@@ -27,7 +27,8 @@ CREATE TABLE IF NOT EXISTS guidance (
   summary    TEXT,
   full_text  TEXT    NOT NULL,
   topics     TEXT,
-  status     TEXT    DEFAULT 'current'
+  status     TEXT    DEFAULT 'current',
+  source_url TEXT
 );
 
 CREATE INDEX IF NOT EXISTS idx_guidance_date   ON guidance(date);
@@ -67,7 +68,8 @@ CREATE TABLE IF NOT EXISTS advisories (
   affected_products TEXT,
   summary           TEXT,
   full_text         TEXT    NOT NULL,
-  cve_references    TEXT
+  cve_references    TEXT,
+  source_url        TEXT
 );
 
 CREATE INDEX IF NOT EXISTS idx_advisories_date     ON advisories(date);
@@ -119,6 +121,7 @@ export interface Guidance {
   full_text: string;
   topics: string | null;
   status: string;
+  source_url: string | null;
 }
 
 export interface Advisory {
@@ -131,6 +134,7 @@ export interface Advisory {
   summary: string | null;
   full_text: string;
   cve_references: string | null;
+  source_url: string | null;
 }
 
 export interface Framework {
